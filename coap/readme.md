@@ -5,14 +5,17 @@ This is the coap server instances for very smart backend. `.well-known/core` end
 ## How to
 
 1. `pip install -r requirements.txt` to install all the required packages in the virtualenv.
-2. `python3 server.py` to run the server.
-3. `python3 test_client.py` to test the server's endpoints
+2. `python3 server.py` to run the server or `nohup python3 server.py &` to run in detach mode.
+3. `python3 test_client.py` to test the server's endpoints. Other than testing the endpoints availability, it has no other practical function. 
 
 ### Endpoints
 
-1. Get - [coap://(ip_address):5683/hello] - Simple Hello World Endpoint.
-2. Get - [coap://(ip_address):5683/whoami] - Returns Who Am I Response.
-3. Post - [coap://(ip_address)/hello] - General purpose Post Endpoint, for now.
+IP_ADDRESS = 172.105.117.206
+PORT = 5683
+
+1. Get - [coap://(IP_ADDRESS):(PORT)/hello] - Simple Hello World Endpoint.
+2. Get - [coap://(IP_ADDRESS):(PORT)/whoami] - Returns Who Am I Response.
+3. Post - [coap://(IP_ADDRESS):(PORT)/hello] - General purpose Post Endpoint, for now.
 
 ### Contributor
 
