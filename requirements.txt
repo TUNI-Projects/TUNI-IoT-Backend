@@ -5,6 +5,7 @@ asyncio==3.4.3
 Django==4.1.7
 httptools==0.5.0
 multidict==6.0.4
+python-decouple==3.8
 sanic==22.12.0
 sanic-routing==22.8.0
 sqlparse==0.4.3

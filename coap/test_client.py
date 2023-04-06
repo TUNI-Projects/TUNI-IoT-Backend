@@ -1,5 +1,11 @@
 import asyncio
 import aiocoap
+from decouple import config
+import sys
+
+COAP_SERVER_ADDRESS = config('coap_server_address', None)
+COAP_PORT = config('coap_port', None)
+
 
 async def get():
     # Create a context and a request
@@ -10,7 +16,8 @@ async def get():
     request = aiocoap.Message(code=aiocoap.GET)
 
     # Set the request URI to the hello resource we created
-    request.set_request_uri('coap://localhost:5683/hello')
+    request.set_request_uri(
+        'coap://{}:{}/hello'.format(COAP_SERVER_ADDRESS, COAP_PORT))
 
     # Send the request and wait for the response
     response = await context.request(request).response
@@ -18,15 +25,17 @@ async def get():
     # Print the response payload
     print("Response >> ", response.payload.decode())
     print("-----------------------------------------")
-    
-    request.set_request_uri('coap://localhost:5683/whoami')
-    
+
+    request.set_request_uri(
+        'coap://{}:{}/whoami'.format(COAP_SERVER_ADDRESS, COAP_PORT))
+
     # Send the request and wait for the response
     response = await context.request(request).response
 
     # Print the response payload
     print("Response: >> ")
     print(response.payload.decode())
+
 
 async def post():
     print("-----------------------------------------")
@@ -37,10 +46,11 @@ async def post():
     request = aiocoap.Message(code=aiocoap.POST)
 
     # Set the request URI to the hello resource we created
-    request.set_request_uri('coap://localhost/hello')
+    request.set_request_uri(
+        'coap://{}:{}/hello'.format(COAP_SERVER_ADDRESS, COAP_PORT))
 
     # Set the request payload
-    payload = b"Hello, server!"
+    payload = b"Hello, server! Your Payload goes here in bytes"
     request.payload = payload
     print("Payload to server: {}".format(payload))
     print("Payload type: ", type(payload))
@@ -49,10 +59,13 @@ async def post():
     response = await context.request(request).response
 
     # Print the response payload
-    print(response.payload.decode())
+    print("From Server: ", response.payload.decode())
 
 if __name__ == "__main__":
-    choice = input("choose 1 to test get request, choose 2 to test post request >> ")
+    if COAP_SERVER_ADDRESS is None or COAP_PORT is None:
+        sys.exit("COAP Server Address or Port Not Found. Terminated!")
+    choice = input(
+        "choose 1 to test get request, choose 2 to test post request >> ")
     if choice == "1":
         asyncio.run(get())
     elif choice == "2":
