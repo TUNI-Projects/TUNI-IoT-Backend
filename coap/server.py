@@ -1,9 +1,10 @@
-import datetime
 import logging
 
 import asyncio
 import aiocoap.resource as resource
 import aiocoap
+import requests
+from decouple import config
 
 
 class VerySmartResource(resource.Resource):
@@ -17,7 +18,23 @@ class VerySmartResource(resource.Resource):
     async def render_post(self, request):
         payload = request.payload
         print("received payload: {}".format(payload))
-        return aiocoap.Message(payload=payload)
+        payload = payload.decode().split(" ")
+
+        if len(payload) == 6:
+            new_payload = {
+                "acc": payload[:3],
+                "gyro": payload[3:6],
+                "heart": payload[6]
+            }
+            try:
+                url = config("cloud_server", None)
+                resp = requests.post(url, json=new_payload)
+                print("server: {}-{}".format(resp.status_code, resp.text))
+                return aiocoap.Message(payload=(resp.text).encode())
+            except requests.exceptions.MissingSchema:
+                return aiocoap.Message(payload=b'no server communicado!')
+        else:
+            return aiocoap.Message(payload=b'no server communicado!')
 
 
 class WhoAmI(resource.Resource):
