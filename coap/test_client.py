@@ -50,7 +50,7 @@ async def post():
         'coap://{}:{}/hello'.format(COAP_SERVER_ADDRESS, COAP_PORT))
 
     # Set the request payload
-    payload = b"Hello, server! Your Payload goes here in bytes"
+    payload = b"0.05 -0.99 -0.02 -0.39 0.33 -0.16 109"
     request.payload = payload
     print("Payload to server: {}".format(payload))
     print("Payload type: ", type(payload))

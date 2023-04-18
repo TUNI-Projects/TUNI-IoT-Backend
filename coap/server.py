@@ -19,8 +19,7 @@ class VerySmartResource(resource.Resource):
         payload = request.payload
         print("received payload: {}".format(payload))
         payload = payload.decode().split(" ")
-
-        if len(payload) == 6:
+        if len(payload) == 7:
             new_payload = {
                 "acc": payload[:3],
                 "gyro": payload[3:6],
@@ -29,7 +28,7 @@ class VerySmartResource(resource.Resource):
             try:
                 url = config("cloud_server", None)
                 resp = requests.post(url, json=new_payload)
-                print("server: {}-{}".format(resp.status_code, resp.text))
+                print("server: {} {}".format(resp.status_code, resp.text))
                 return aiocoap.Message(payload=(resp.text).encode())
             except requests.exceptions.MissingSchema:
                 return aiocoap.Message(payload=b'no server communicado!')
