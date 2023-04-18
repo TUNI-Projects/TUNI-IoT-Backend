@@ -3,8 +3,14 @@ import aiocoap
 from decouple import config
 import sys
 
-COAP_SERVER_ADDRESS = config('coap_server_address', None)
-COAP_PORT = config('coap_port', None)
+if config("env", "prod") == "dev":
+    print("Running Env: dev")
+    COAP_SERVER_ADDRESS = "localhost"
+    COAP_PORT = 5683
+else:
+    print("Running Env: prod")
+    COAP_SERVER_ADDRESS = config('coap_server_address', None)
+    COAP_PORT = config('coap_port', None)
 
 
 async def get():

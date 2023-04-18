@@ -11,6 +11,13 @@ class VerySmartResource(resource.Resource):
     def __init__(self):
         super().__init__()
         self.content = b"Hello, world!"
+        
+        if config("env", "prod") == "dev":
+            print("Running Env: dev")
+            self.server_url = "http://localhost:8000/iot/data/"
+        else:
+            print("Running Env: prod")
+            self.server_url = config("cloud_server", None)
 
     async def render_get(self, request):
         return aiocoap.Message(payload=self.content)
@@ -26,7 +33,7 @@ class VerySmartResource(resource.Resource):
                 "heart": payload[6]
             }
             try:
-                url = config("cloud_server", None)
+                url = self.server_url
                 resp = requests.post(url, json=new_payload)
                 print("server: {} {}".format(resp.status_code, resp.text))
                 return aiocoap.Message(payload=(resp.text).encode())
