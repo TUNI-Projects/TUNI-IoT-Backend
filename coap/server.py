@@ -38,9 +38,11 @@ class VerySmartResource(resource.Resource):
                 print("server: {} {}".format(resp.status_code, resp.text))
                 return aiocoap.Message(payload=(resp.text).encode())
             except requests.exceptions.MissingSchema:
-                return aiocoap.Message(payload=b'no server communicado!')
+                return aiocoap.Message(payload=b'no server communicado! missing schema!')
+            except requests.exceptions.ConnectionError:
+                return aiocoap.Message(payload=b'no server communicado! connection err!')
         else:
-            return aiocoap.Message(payload=b'no server communicado!')
+            return aiocoap.Message(payload=b'no server communicado! not enough data!')
 
 
 class WhoAmI(resource.Resource):
