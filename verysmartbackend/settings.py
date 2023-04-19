@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-djev+=*$d)@24-z5yor+uwfozs^mhqe=lr^($+e!6g3!92e!_q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-COAP_HOST = 'localhost'  # Replace with the IP address of your CoAP server
-COAP_PORT = 56831  # Replace with the port number of your CoAP server
+DEBUG = True if config("debug", "False") == "True" else False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -42,6 +41,7 @@ INSTALLED_APPS = [
     
     # --------------------------
     'iot_receiver',
+    'api',
 ]
 
 MIDDLEWARE = [

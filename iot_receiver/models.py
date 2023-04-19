@@ -11,6 +11,7 @@ class data(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     heart = models.FloatField()
+    created_on = models.DateTimeField(auto_now_add=True)
 
 
 class acc(models.Model):
