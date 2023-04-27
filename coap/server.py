@@ -1,3 +1,4 @@
+import os
 import logging
 
 import asyncio
@@ -6,12 +7,15 @@ import aiocoap
 import requests
 from decouple import config
 
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import serialization, hashes
+
 
 class VerySmartResource(resource.Resource):
     def __init__(self):
         super().__init__()
         self.content = b"Hello, world!"
-        
+
         if config("env", "prod") == "dev":
             print("Running Env: dev")
             self.server_url = "http://localhost:8000/iot/data/"
@@ -20,12 +24,70 @@ class VerySmartResource(resource.Resource):
             self.server_url = config("cloud_server", None)
 
     async def render_get(self, request):
+        """
+        This endpint does nothing. It just returns the data as it is.
+
+        Args:
+            request (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         return aiocoap.Message(payload=self.content)
 
+    async def decrypt(self, data):
+        """
+        this function will TRY to decrypt the encrypted data
+
+        Args:
+            data (_type_): _description_
+        """
+        filename = "awesome_secret" # this is a hard coded file name.
+        directory = "ssh_keys"
+        path = os.path.join(directory, filename)
+        if not os.path.isfile(path):
+            return data
+
+        with open(path, "rb") as key_file:
+            private_key_data = key_file.read()
+            loaded_private_key = serialization.load_ssh_private_key(
+                private_key_data,
+                password=None,
+            )
+
+        try:
+            decrypted_data = loaded_private_key.decrypt(
+                data,
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                )
+            )
+            return decrypted_data
+        except ValueError:
+            return data
+
     async def render_post(self, request):
+        """
+        The magic happens here.
+
+        Args:
+            request (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         payload = request.payload
+        print("-----------------------")
         print("received payload: {}".format(payload))
+        
+        payload = await self.decrypt(payload)
+        print("decrypted payload: {}".format(payload))
+        print("-----------------------")
+        
         payload = payload.decode().split(" ")
+        
         if len(payload) == 7:
             new_payload = {
                 "acc": payload[:3],

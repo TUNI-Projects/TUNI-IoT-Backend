@@ -1,7 +1,11 @@
+import os
 import asyncio
 import aiocoap
 from decouple import config
 import sys
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 
 if config("env", "prod") == "dev":
     print("Running Env: dev")
@@ -43,6 +47,34 @@ async def get():
     print(response.payload.decode())
 
 
+async def encrypt(data: bytes):
+    """encrypt the data using public key encryption system.
+    if there's no public key available, it will send the data as it is.
+
+    Args:
+        data (bytes): _description_
+    """
+    filename = "awesome_secret.pub"
+    directory = "ssh_keys"
+    path = os.path.join(directory, filename)
+    if not os.path.isfile(path):
+        return data
+    else:
+        with open(os.path.join(directory, filename), "rb") as key_file:
+            ssh_key_data = key_file.read()
+            loaded_public_key = load_ssh_public_key(ssh_key_data)
+
+        encrypted_data = loaded_public_key.encrypt(
+            data,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        return encrypted_data
+
+
 async def post():
     print("-----------------------------------------")
     print("Testing Post Request End Points")
@@ -57,8 +89,10 @@ async def post():
 
     # Set the request payload
     payload = b"0.05 -0.99 -0.02 -0.39 0.33 -0.16 109"
-    request.payload = payload
     print("Payload to server: {}".format(payload))
+    payload = await encrypt(payload)
+    print("Encrypted payload to server: {}".format(payload))
+    request.payload = payload
     print("Payload type: ", type(payload))
 
     # Send the request and wait for the response
