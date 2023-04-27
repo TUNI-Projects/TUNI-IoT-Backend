@@ -14,7 +14,7 @@ class LastAvailableData(WebsocketConsumer):
         gyro_data = gyro.objects.latest('created_on')
 
         payload = {
-            'index': heart_data.id,
+            'index': str(heart_data.id),
             'heart': heart_data.heart,
             'created_on': (heart_data.created_on).timestamp(),
             'acc': {
