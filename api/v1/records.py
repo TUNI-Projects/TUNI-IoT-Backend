@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from datetime import datetime
+from datetime import datetime, timedelta
 from iot_receiver.models import data as data_db, gyro, acc
 
 
@@ -47,6 +47,11 @@ class Records(APIView):
         if (start_date is not None and end_date is None) or (start_date is None and end_date is not None):
             return JsonResponse({
                 "message": "Invalid parameter. Both from and to is needed!"
+            }, status=400)
+        
+        if (end_date - start_date).days > 1:
+            return JsonResponse({
+                "message": "Maximum 1 day worth of data record is supported!"
             }, status=400)
 
         if choice == "gyro":
