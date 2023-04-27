@@ -9,9 +9,9 @@ class LastAvailableData(WebsocketConsumer):
         self.accept()
 
     def receive(self, text_data=None, bytes_data=None):
-        heart_data = heart.objects.last()
-        acc_data = acc.objects.last()
-        gyro_data = gyro.objects.last()
+        heart_data = heart.objects.latest('created_on')
+        acc_data = acc.objects.latest('created_on')
+        gyro_data = gyro.objects.latest('created_on')
 
         payload = {
             'heart': heart_data.heart,
